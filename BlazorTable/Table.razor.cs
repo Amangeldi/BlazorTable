@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BlazorTable
 {
-    public class TableBase<Item>:ComponentBase
+    public class TableBase<TItem>:ComponentBase
     {
         public int pagesCount;
         public int curPage;
@@ -17,12 +17,12 @@ namespace BlazorTable
         [Parameter]
         public RenderFragment TableHeader { get; set; }
         [Parameter]
-        public RenderFragment<Item> TableRow { get; set; }
+        public RenderFragment<TItem> TableRow { get; set; }
         [Parameter]
-        public IEnumerable<Item> Items { get; set; }
+        public IEnumerable<TItem> Items { get; set; }
         [Parameter]
         public int PageSize { get; set; }
-        public IEnumerable<Item> ItemList { get; set; }
+        public IEnumerable<TItem> ItemList { get; set; }
         protected override async Task OnInitializedAsync()
         {
             pagerSize = 6;
@@ -31,7 +31,7 @@ namespace BlazorTable
             pagesCount = (int)Math.Ceiling(Items.Count() / (decimal)PageSize);
             SetPagerSize("forward");
         }
-        public void updateList(int currentPage)
+        public void UpdateList(int currentPage)
         {
             ItemList = Items.Skip((currentPage - 1) * PageSize).Take(PageSize);
             curPage = currentPage;
@@ -82,7 +82,7 @@ namespace BlazorTable
                     curPage -= 1;
                 }
             }
-            updateList(curPage);
+            UpdateList(curPage);
         }
     }
 }
