@@ -35,5 +35,6 @@ dotnet add package AmanTable
 ```
 # Пример вывода
 ![alt text](https://raw.githubusercontent.com/Amangeldi/BlazorTable/master/1.png)
+Процесс создания компоненты описан в статье по [ссылке](https://github.com/Amangeldi/BlazorTable/blob/master/How%20to%20create%20a%20table%20blazor%20component.md)
 # Обратная связь
 Не стесняйтесь использовать этот компонент и оставлять свои ценные отзывы. Если вы столкнетесь с ошибками, откройте Issue и обсудите его.
