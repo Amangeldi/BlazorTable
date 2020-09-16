@@ -14,18 +14,6 @@
 else
 {
     <Table Items="@forecasts" PageSize="4">
-        <TableHeader>
-            <th>Date</th>
-            <th>TemperatureC</th>
-            <th>TemperatureF</th>
-            <th>Summary</th>
-        </TableHeader>
-        <TableRow>
-            <td>@context.Date.ToShortDateString()</td>
-            <td>@context.TemperatureC</td>
-            <td>@context.TemperatureF</td>
-            <td>@context.Summary</td>
-        </TableRow>
     </Table>
 }
 

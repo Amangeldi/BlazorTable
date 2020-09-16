@@ -23,6 +23,7 @@ namespace Test
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("https://*:4444"); 
                 });
     }
 }

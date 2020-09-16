@@ -2,12 +2,42 @@
 @typeparam TItem
 <table class="table table-striped">
     <thead>
-        <tr class="">@TableHeader</tr>
+        <tr class="">
+            @foreach (var property in properties)
+            {
+                <th>
+                    @property.Name
+                </th>
+            }
+        </tr>
     </thead>
     <tbody>
+        <tr>
+            @foreach (var property in properties)
+            {
+                Func<TItem, string> func = GetPropertyDelegate<TItem>(property);
+                <td>
+                    <input type="text" class="form-control" @oninput="e=>ApplyFilter(func, e.Value.ToString())" />
+                </td>
+            }
+        </tr>
         @foreach (var item in ItemList)
         {
-            <tr class="">@TableRow(item)</tr>
+            <tr>
+                @foreach (var property in properties)
+                {
+                    <td>
+                        @if (property.PropertyType == typeof(DateTime))
+                        {
+                            @(((DateTime)property.GetValue(item)).ToShortDateString())
+                        }
+                        else
+                        {
+                            @property.GetValue(item)
+                        }
+                    </td>
+                }
+            </tr>
         }
     </tbody>
 </table>
