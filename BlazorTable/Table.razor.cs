@@ -21,21 +21,38 @@ namespace BlazorTable
         [Parameter]
         public int PageSize { get; set; }
         public IEnumerable<TItem> ItemList { get; set; }
-        public List<TItem> filteredItems = new List<TItem>();
-        public IEnumerable<TItem> DisplayedItems { get
+        List<TItem> filteredItems = new List<TItem>();
+        public List<TItem> FilteredItems { 
+            get
             { 
                 if(filteredItems.Count()==0)
                 {
-                    return Items;
+                    return Items.ToList();
                 }
                 else
                 {
                     return filteredItems;
                 }
+            }
+            set 
+            {
+                filteredItems = value;
+            } 
+        } 
+        public IEnumerable<TItem> DisplayedItems { get
+            { 
+                if(filters.Count()==0)
+                {
+                    return Items;
+                }
+                else
+                {
+                    return FilteredItems;
+                }
             } 
         }
         public PropertyInfo[] properties;
-        public Dictionary<Func<TItem, string>, string> filters = new Dictionary<Func<TItem, string>, string>();
+        public List<(string, Func<TItem, string>, string)> filters = new List<(string, Func<TItem, string>, string)>();
         protected override void OnInitialized()
         {
             properties = typeof(TItem).GetProperties();
@@ -49,40 +66,38 @@ namespace BlazorTable
             SetPagerSize("forward");
             StateHasChanged();
         }
-        public void ApplyFilter(Func<TItem, string> func, string text)
+        public void ApplyFilter(PropertyInfo property, string text)
         {
+            Func<TItem, string> func = GetPropertyDelegate<TItem>(property);
             List<Func<TItem, bool>> predicates = new List<Func<TItem, bool>>();
-            // Тут нужна помощь
-            if (filters.Where(p => AreMethodsEqual(p.Key.Method, func.Method)).Count() > 0 && !string.IsNullOrEmpty(text))
+
+            if (filters.Where(p => p.Item1 == property.Name).Count() > 0 && !string.IsNullOrEmpty(text))
             {
-                filters[func] = text;
+                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                filters.Remove(filter);
+                filter.Item3 = text;
+                filters.Add(filter);
             }
-            else if(filters.Where(p => AreMethodsEqual(p.Key.Method, func.Method)).Count() > 0 && string.IsNullOrEmpty(text))
+            else if(filters.Where(p => p.Item1 == property.Name).Count() > 0 && string.IsNullOrEmpty(text))
             {
-                filters.Remove(func);
+                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                filters.Remove(filter);
             }
-            else if(!(filters.Where(p => AreMethodsEqual(p.Key.Method, func.Method)).Count() > 0) && !string.IsNullOrEmpty(text))
+            else if(!(filters.Where(p => p.Item1 == property.Name).Count() > 0) && !string.IsNullOrEmpty(text))
             {
-                filters.Add(func, text);
+                (string, Func<TItem, string>, string) filter = (property.Name, func, text);
+                filters.Add(filter);
             }
             foreach(var filter in filters)
             {
-                Func<TItem, bool> predicate = p => filter.Key(p).Contains(filter.Value);
+                Func<TItem, bool> predicate = p => filter.Item2(p).Contains(filter.Item3);
                 predicates.Add(predicate);
             }
             foreach(var predicate in predicates)
             {
-                filteredItems = DisplayedItems.Where(predicate).ToList();
+                FilteredItems = FilteredItems.Where(predicate).ToList();
             }
             Refresh();
-        }
-        public bool AreMethodsEqual(MethodBase left, MethodBase right)
-        {
-            MethodBody m1 = left.GetMethodBody();
-            MethodBody m2 = right.GetMethodBody();
-            byte[] il1 = m1.GetILAsByteArray();
-            byte[] il2 = m2.GetILAsByteArray();
-            return il1.SequenceEqual(il2);
         }
         public void UpdateList(int currentPage)
         {
@@ -136,18 +151,6 @@ namespace BlazorTable
                 }
             }
             UpdateList(curPage);
-        }
-        static List<Func<T, string>> GetPropertiesDelegates<T>(PropertyInfo[] properties)
-        {
-            List<Func<T, string>> delegates = new List<Func<T, string>>(properties.Length);
-            foreach (var pi in properties)
-            {
-                if (pi.CanRead)
-                {
-                    delegates.Add(x => pi.GetValue(x)?.ToString());
-                }
-            }
-            return delegates;
         }
         public static Func<T, string> GetPropertyDelegate<T>(PropertyInfo property)
         {

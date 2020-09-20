@@ -15,9 +15,8 @@
         <tr>
             @foreach (var property in properties)
             {
-                Func<TItem, string> func = GetPropertyDelegate<TItem>(property);
                 <td>
-                    <input type="text" class="form-control" @oninput="e=>ApplyFilter(func, e.Value.ToString())" />
+                    <input type="text" class="form-control" @oninput="e=>ApplyFilter(property, e.Value.ToString())" />
                 </td>
             }
         </tr>
