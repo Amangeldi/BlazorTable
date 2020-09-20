@@ -43,7 +43,7 @@ dotnet add package AmanTable
 ![alt text](https://raw.githubusercontent.com/Amangeldi/BlazorTable/master/1.png)
 Процесс создания компоненты описан в статье по [ссылке](https://github.com/Amangeldi/BlazorTable/blob/master/How%20to%20create%20a%20table%20blazor%20component.md)
 # Что нового в версии 1.2.0
-Добавил функционал фильтрации
+Добавил функционал фильтрации <br>
 избавился от RenderFragment-ов в пользу рефлексии
 # Обратная связь
 Не стесняйтесь использовать этот компонент и оставлять свои ценные отзывы. Если вы столкнетесь с ошибками, откройте Issue и обсудите его.
