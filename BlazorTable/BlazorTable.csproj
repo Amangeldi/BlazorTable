@@ -8,8 +8,15 @@
     <PackageIcon>background.png</PackageIcon>
     <RepositoryUrl>https://github.com/Amangeldi/BlazorTable</RepositoryUrl>
     <PackageId>AmanTable</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <PackageLicenseFile>license.txt</PackageLicenseFile>
+    <Description>BlazorTable - компонент таблица многоразового использования для Blazor</Description>
+    <Copyright>Аннаклычев Амангелди</Copyright>
+    <PackageProjectUrl>https://github.com/Amangeldi/BlazorTable</PackageProjectUrl>
+    <PackageReleaseNotes>Что нового?
+Добавил функционал фильтрации
+избавился от RenderFragment-ов в пользу рефлексии</PackageReleaseNotes>
+    <NeutralLanguage></NeutralLanguage>
   </PropertyGroup>
 
 
