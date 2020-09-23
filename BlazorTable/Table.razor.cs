@@ -52,7 +52,7 @@ namespace BlazorTable
             } 
         }
         public PropertyInfo[] properties;
-        public List<(string, Func<TItem, string>, string)> filters = new List<(string, Func<TItem, string>, string)>();
+        public List<(PropertyInfo, string)> filters = new List<(PropertyInfo, string)>();
         protected override void OnInitialized()
         {
             properties = typeof(TItem).GetProperties();
@@ -68,34 +68,26 @@ namespace BlazorTable
         }
         public void ApplyFilter(PropertyInfo property, string text)
         {
-            Func<TItem, string> func = GetPropertyDelegate<TItem>(property);
-            List<Func<TItem, bool>> predicates = new List<Func<TItem, bool>>();
-
-            if (filters.Where(p => p.Item1 == property.Name).Count() > 0 && !string.IsNullOrEmpty(text))
+            if (filters.Where(p => p.Item1 == property).Count() > 0 && !string.IsNullOrEmpty(text))
             {
-                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                var filter = filters.Where(p => p.Item1 == property).First();
                 filters.Remove(filter);
-                filter.Item3 = text;
+                filter.Item2 = text;
                 filters.Add(filter);
             }
-            else if(filters.Where(p => p.Item1 == property.Name).Count() > 0 && string.IsNullOrEmpty(text))
+            else if(filters.Where(p => p.Item1 == property).Count() > 0 && string.IsNullOrEmpty(text))
             {
-                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                var filter = filters.Where(p => p.Item1 == property).First();
                 filters.Remove(filter);
             }
-            else if(!(filters.Where(p => p.Item1 == property.Name).Count() > 0) && !string.IsNullOrEmpty(text))
+            else if(!(filters.Where(p => p.Item1 == property).Count() > 0) && !string.IsNullOrEmpty(text))
             {
-                (string, Func<TItem, string>, string) filter = (property.Name, func, text);
+                (PropertyInfo, string) filter = (property, text);
                 filters.Add(filter);
             }
             foreach(var filter in filters)
             {
-                Func<TItem, bool> predicate = p => filter.Item2(p).Contains(filter.Item3);
-                predicates.Add(predicate);
-            }
-            foreach(var predicate in predicates)
-            {
-                FilteredItems = FilteredItems.Where(predicate).ToList();
+                FilteredItems = FilteredItems.Where(p=>filter.Item1.GetValue(p).ToString().Contains(filter.Item2)).ToList();
             }
             Refresh();
         }
