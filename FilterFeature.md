@@ -77,6 +77,25 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
             return x => property.GetValue(x)?.ToString();
         }
 ```
+Делегаты - это мощный инструмент, но сдесь они излишний функционал. Используя их я столкнулся с проблемой сравнивания делегатов типа p=>p.Property. predicate.Equals(func) не будет работать, так как во время исполнения программы они будут представлены разными анонимными методами. Конечно же есть способ сравнить их по IL коду:
+```c#
+    static bool AreMethodsEqual(MethodBase left, MethodBase right)
+    {
+        MethodBody m1 = left.GetMethodBody();
+        MethodBody m2 = right.GetMethodBody();
+        byte[] il1 = m1.GetILAsByteArray();
+        byte[] il2 = m2.GetILAsByteArray();
+        return il1.SequenceEqual(il2);
+    }
+```
+Если нет другого способа сравнить делегаты Func, то это решение работает. Но в 99% случаях есть решение проще и правильнее.
+В нашем случае мы можем убрать с нашего кортежа значение Func и использовать метод GetValue:
+```c#
+            foreach(var filter in filters)
+            {
+                FilteredItems = FilteredItems.Where(p=>filter.Item1.GetValue(p).ToString().Contains(filter.Item2)).ToList();
+            }
+```
 И для отображения данных мы воспользуемся property.GetValue(item)
 ```c#
         @foreach (var item in ItemList)
@@ -99,8 +118,7 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
         }
 ```
 ## Листинг Table.razor.cs
-```c#
-        public class TableBase<TItem> : ComponentBase
+public class TableBase<TItem> : ComponentBase
     {
         public const int PAGER_SIZE = 6;
         public int pagesCount;
@@ -143,7 +161,7 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
             } 
         }
         public PropertyInfo[] properties;
-        public List<(string, Func<TItem, string>, string)> filters = new List<(string, Func<TItem, string>, string)>();
+        public List<(PropertyInfo, string)> filters = new List<(PropertyInfo, string)>();
         protected override void OnInitialized()
         {
             properties = typeof(TItem).GetProperties();
@@ -159,34 +177,26 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
         }
         public void ApplyFilter(PropertyInfo property, string text)
         {
-            Func<TItem, string> func = GetPropertyDelegate<TItem>(property);
-            List<Func<TItem, bool>> predicates = new List<Func<TItem, bool>>();
-
-            if (filters.Where(p => p.Item1 == property.Name).Count() > 0 && !string.IsNullOrEmpty(text))
+            if (filters.Where(p => p.Item1 == property).Count() > 0 && !string.IsNullOrEmpty(text))
             {
-                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                var filter = filters.Where(p => p.Item1 == property).First();
                 filters.Remove(filter);
-                filter.Item3 = text;
+                filter.Item2 = text;
                 filters.Add(filter);
             }
-            else if(filters.Where(p => p.Item1 == property.Name).Count() > 0 && string.IsNullOrEmpty(text))
+            else if(filters.Where(p => p.Item1 == property).Count() > 0 && string.IsNullOrEmpty(text))
             {
-                var filter = filters.Where(p => p.Item1 == property.Name).First();
+                var filter = filters.Where(p => p.Item1 == property).First();
                 filters.Remove(filter);
             }
-            else if(!(filters.Where(p => p.Item1 == property.Name).Count() > 0) && !string.IsNullOrEmpty(text))
+            else if(!(filters.Where(p => p.Item1 == property).Count() > 0) && !string.IsNullOrEmpty(text))
             {
-                (string, Func<TItem, string>, string) filter = (property.Name, func, text);
+                (PropertyInfo, string) filter = (property, text);
                 filters.Add(filter);
             }
             foreach(var filter in filters)
             {
-                Func<TItem, bool> predicate = p => filter.Item2(p).Contains(filter.Item3);
-                predicates.Add(predicate);
-            }
-            foreach(var predicate in predicates)
-            {
-                FilteredItems = FilteredItems.Where(predicate).ToList();
+                FilteredItems = FilteredItems.Where(p=>filter.Item1.GetValue(p).ToString().Contains(filter.Item2)).ToList();
             }
             Refresh();
         }
