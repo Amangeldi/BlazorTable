@@ -118,6 +118,7 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
         }
 ```
 ## Листинг Table.razor.cs
+```c#
 public class TableBase<TItem> : ComponentBase
     {
         public const int PAGER_SIZE = 6;
