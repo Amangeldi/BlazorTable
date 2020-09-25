@@ -1,8 +1,8 @@
 # Функционал фильтрации для BlazorTable
-В этой статье мы подробно обсудим, как создать фильтр для [таблицы](https://github.com/Amangeldi/BlazorTable),
+В этой статье мы подробно обсудим, как создать фильтр для таблицы, разработка которого описана [в статье по ссылке](https://github.com/Amangeldi/BlazorTable),
 рассмотрим то как рефлексия поможет нам в выявлении свойств объекта, избавимся от наших RenderFragment-ов и обновим наш пакет в системе управления пакетами nuget.
 ## Что нового в компоненте BlazorTable?
-Скачайте решение BlazorTable   [СКАЧАТЬ](https://github.com/Amangeldi/BlazorTable) <br>
+Скачайте решение BlazorTable   [СКАЧАТЬ](https://github.com/Amangeldi/BlazorTable)
 Идея о том, что в TableHeader нужно передавать заголовки колонок, а в TableRow передавать свойства показалось мне не самой лучшей. Было принято решение что лучше в разметке вместо
 ```c#
 <Table Items="@forecasts" PageSize="4">
@@ -37,7 +37,7 @@ public RenderFragment<TItem> TableRow { get; set; }
 ```c#
 public List<(string, Func<TItem, string>, string)> filters = new List<(string, Func<TItem, string>, string)>();
 ```
-Где первый параметр стринг будет хранить имя свойства, второй делегат класса в виде p =>p.Property.ToString(), третий для хранения вводимых значений. <br>
+Где первый параметр string будет хранить имя свойства, второй делегат класса в виде p =>p.Property.ToString(), третий для хранения вводимых значений. <br>
 Для отображения вместо параметра Items будем использовать свойсво DisplayedItems
 ```c# 
         public IEnumerable<TItem> DisplayedItems { get
@@ -61,7 +61,7 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
             ...
         }
 ```
-В начале таблицы отображаем input-ы равные количеству при клике которого вызывается метод ApplyFilter который принимает PropertyInfo и текст введенный в input.
+В начале таблицы отображаем input-ы равные количеству свойств, и при клике каждого вызывается метод ApplyFilter который принимает PropertyInfo и текст введенный в input.
 ```c#
             @foreach (var property in properties)
             {
@@ -70,7 +70,7 @@ public List<(string, Func<TItem, string>, string)> filters = new List<(string, F
                 </td>
             }
 ```
-В методе ApplyFilter нам понадобится достать делегат Func<T, string> из нашего PropertyInfo
+В методе ApplyFilter нам понадобится достать делегат Func<T, string> из значения параметра PropertyInfo
 ```c#
         public static Func<T, string> GetPropertyDelegate<T>(PropertyInfo property)
         {
